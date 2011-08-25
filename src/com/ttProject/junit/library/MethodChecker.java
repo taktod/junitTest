@@ -75,8 +75,8 @@ public class MethodChecker {
 					System.out.println("...passed...");
 				}
 				else {
-					System.out.println("value is irruptted...");
-					fail("value is irruptted...");
+					System.out.println("value is corrupted...");
+					fail("value is corrupted...");
 					return;
 				}
 			}

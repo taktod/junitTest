@@ -27,7 +27,11 @@ public class TestTarget {
 		System.out.println(data);
 		return Long.toString(l + 1L);
 	}
-	public int hoge(Integer a, int b) {
-		return a+b;
+	@Junit({
+		@Test(params={"test", "15"}, assume="test15"),
+		@Test(params={"135", "135"}, assume="270")
+	})
+	public String testTarget(String a, int b) {
+		return a + b;
 	}
 }
