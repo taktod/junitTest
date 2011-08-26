@@ -30,7 +30,7 @@ public class MethodChecker {
 		for(Class<?> cls : classSet) {
 			for(Method m : cls.getDeclaredMethods()) {
 				if(m.getAnnotation(Junit.class) != null) {
-					System.out.println("check for class:" + cls.getName() + " method:" + m.getName());
+					System.out.println("check for class:(" + cls.getSimpleName() + ") method:(" + m.getName() + ")");
 					// 実行すべきMethod
 					checkMethod(cls, m);
 					System.out.println();
@@ -64,6 +64,8 @@ public class MethodChecker {
 				}
 				System.out.println();
 				Object ret = null;
+				boolean access = method.isAccessible();
+				method.setAccessible(true);
 				if(Modifier.isStatic(method.getModifiers())) {
 					// static関数
 					ret = method.invoke(null, dataList.toArray());
@@ -72,6 +74,7 @@ public class MethodChecker {
 					// 一般関数 (new Instanceの部分初期か方法が指定されている場合はそっちにあわせる。)
 					ret = method.invoke(getClassInstance(cls), dataList.toArray());
 				}
+				method.setAccessible(access);
 				System.out.println("assume : " + testEntry.assume() + " result : " + ret);
 				if(ret == null) {
 					ret = "null";
