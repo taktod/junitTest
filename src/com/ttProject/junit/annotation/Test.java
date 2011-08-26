@@ -6,13 +6,15 @@ import java.lang.annotation.RetentionPolicy;
 /*
  * テスト用のアノーテーション
  * paramsは入力配列
- * "[abc][test][gesg][trsy]" hashSetにする。型は関数の引数の型に合わせる(Objectの場合はStringにマージ)
- * "[a->test][b->hello]" hashMapにする。型は関数の引数の型に合わせる(Objectの場合はStringにマージ)
+ * "@string[abc][test][gesg][trsy]" hashSetにする。型は自分で宣言する必要あり。(省略時はString強制)
+ * "$string@string[a->test][b->hello]" hashMapにする。型は自分で宣言する必要あり。(省略時はString強制 keyもvalも)
+ * つかえる型はchar byte short int long double float string
+ * 使える型は
  * *[は入力文字に指定不可
  * assumeはあるべき結果
- * @none 応答チェックなし。
- * @dump 応答データを標準出力にだす。チェックはしない。
- * @Exception 例外
+ * @none 応答チェックなし。(できた)
+ * @dump 応答データを標準出力にだす。チェックはしない。(できた)
+ * @Exception 例外(できた)
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Test {

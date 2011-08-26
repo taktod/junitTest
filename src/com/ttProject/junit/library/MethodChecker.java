@@ -76,11 +76,15 @@ public class MethodChecker {
 					ret = method.invoke(getClassInstance(cls), dataList.toArray());
 				}
 				method.setAccessible(access);
-				System.out.println("assume : " + testEntry.assume() + " result : " + ret);
+				String assume = testEntry.assume();
+				System.out.println("assume : " + assume + " result : " + ret);
 				if(ret == null) {
 					ret = "null";
 				}
-				if(testEntry.assume().equals(ret.toString())) {
+				if(assume.equals("@dump")) {
+					dumpAll(ret);
+				}
+				else if(assume.equals("@none") || assume.equals(ret.toString())) {
 					System.out.println("...passed...");
 				}
 				else {
@@ -90,11 +94,15 @@ public class MethodChecker {
 				}
 			}
 			catch (Exception e) {
-				if(testEntry.assume().indexOf("Exception") != -1) {
+				String assume = testEntry.assume();
+				System.out.println(assume);
+				if(assume.indexOf("Exception") != -1) {
 					try {
-						if((e.getClass().getName().indexOf(testEntry.assume()) != -1)
-							|| (e.getCause().getClass().getName().indexOf(testEntry.assume()) != -1)
-							|| (e.getCause().getCause().getClass().getName().indexOf(testEntry.assume()) != -1)) {
+						assume = assume.substring(1);
+						System.out.println(assume);
+						if((e.getClass().getName().indexOf(assume) != -1)
+							|| (e.getCause().getClass().getName().indexOf(assume) != -1)
+							|| (e.getCause().getCause().getClass().getName().indexOf(assume) != -1)) {
 							// 指定されている例外が存在する場合はOK
 							System.out.println("find the exception : " + testEntry.assume());
 							System.out.println("...passed...");
@@ -148,7 +156,8 @@ public class MethodChecker {
 			
 		}
 		// それ以外のクラスの場合、そこにInitのアノーテーション指定があるなら、その初期化方法で、それ以外の場合はデフォルトコンストラクタを利用して。おく。
-		return getClassInstance(type);
+		return null;
+//		return getClassInstance(type);
 	}
 	/**
 	 * 対象クラスのデフォルトインスタンスを生成する。
@@ -198,6 +207,16 @@ public class MethodChecker {
 			if(access != null) {
 				constructor.setAccessible(access);
 			}
+		}
+	}
+	private void dumpAll(Object obj) {
+		if(obj instanceof Object[]) {
+			for(Object ob : (Object[])obj) {
+				System.out.println(ob);
+			}
+		}
+		else {
+			System.out.println(obj);
 		}
 	}
 }
