@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.ttProject.junit.annotation.Init;
@@ -128,6 +129,23 @@ public class MethodChecker {
 		}
 		if(type == double.class || type == Double.class) {
 			return new Double(obj);
+		}
+		if(type == short.class || type == Short.class) {
+			return new Short(obj);
+		}
+		if(type == byte.class || type == Byte.class) {
+			return new Byte(obj);
+		}
+		if(type == char.class || type == Character.class) {
+			return obj.charAt(0);
+		}
+		if(type == boolean.class || type == Boolean.class) {
+			return new Boolean(obj);
+		}
+		if(type == Set.class) {
+		}
+		if(type == Map.class) {
+			
 		}
 		// それ以外のクラスの場合、そこにInitのアノーテーション指定があるなら、その初期化方法で、それ以外の場合はデフォルトコンストラクタを利用して。おく。
 		return getClassInstance(type);
