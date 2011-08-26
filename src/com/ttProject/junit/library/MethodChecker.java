@@ -136,13 +136,13 @@ public class MethodChecker {
 	 */
 	private Object getClassInstance(Class<?> cls) {
 		Init init = null;
-		boolean access;
+		Boolean access = null;
 		Constructor<?> constructor = null;
 		// まずコンストラクタにアノーテーションがついているかチェック。
 		for(Constructor<?> construct : cls.getDeclaredConstructors()) {
+			constructor = construct;
 			init = construct.getAnnotation(Init.class);
 			if(init != null) {
-				constructor = construct;
 				break;
 			}
 		}
@@ -165,7 +165,7 @@ public class MethodChecker {
 			}
 			else {
 				// アノーテーション指定がない。
-				return cls.newInstance();
+				return constructor.newInstance();
 			}
 		}
 		catch (Exception e) {
@@ -174,7 +174,9 @@ public class MethodChecker {
 			return null;
 		}
 		finally {
-			constructor.setAccessible(access);
+			if(access != null) {
+				constructor.setAccessible(access);
+			}
 		}
 	}
 }

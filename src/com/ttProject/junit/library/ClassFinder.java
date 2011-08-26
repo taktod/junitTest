@@ -7,11 +7,23 @@ import java.util.Set;
 
 import com.ttProject.junit.annotation.Junit;
 
+/**
+ * 前準備としてクラス情報を取得する。
+ * @author taktod
+ */
 public class ClassFinder {
+	/** 分割文字(ディレクトリ) */
 	static String DIR_SEPARATOR = File.separator;
+	/** 分割文字(パス) */
 	static String PATH_SEPARATOR = System.getProperty("path.separator");
+	/** 分割文字(パッケージ) */
 	static String PACKAGE_SEPARATOR = "\\.";
 
+	/**
+	 * targetPathの文字列と対応しているクラスを探す。
+	 * @param targetPath
+	 * @return
+	 */
 	public Set<Class<?>> getAppClass(String targetPath) {
 		Set<Class<?>> classSet = new HashSet<Class<?>>();
 		String pathes = System.getProperty("java.class.path");
@@ -35,6 +47,12 @@ public class ClassFinder {
 		}
 		return classSet;
 	}
+	/**
+	 * クラスを見つける。
+	 * @param findedClassSet
+	 * @param dir
+	 * @param p
+	 */
 	private void findClass(Set<Class<?>> findedClassSet, File dir, String p) {
 		String path = p + ".";
 		File[] files = dir.listFiles();
@@ -55,6 +73,11 @@ public class ClassFinder {
 			}
 		}
 	}
+	/**
+	 * クラスを確認する。
+	 * @param findedClassSet
+	 * @param targetClass
+	 */
 	private void checkClass(Set<Class<?>> findedClassSet, Class<?> targetClass) {
 		// targetClassがJunitTargetのアノーテーションをもっているか確認する。
 		// 登録されているMethodをすべて列挙する。
