@@ -7,8 +7,8 @@ import org.junit.Test;
 import com.ttProject.junit.library.ClassFinder;
 import com.ttProject.junit.library.MethodChecker;
 
-public class EntryTest {
-	private String packagePath = "com.ttProject";
+public class TestEntry {
+	protected String packagePath = "com.ttProject";
 	private MethodChecker checker = null;
 
 	@Before

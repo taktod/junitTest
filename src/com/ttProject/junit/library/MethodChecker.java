@@ -14,7 +14,12 @@ import com.ttProject.junit.annotation.Test;
 import static org.junit.Assert.*;
 
 public class MethodChecker {
+	/** チェック対象クラス */
 	private Set<Class<?>> classSet = null;
+	/**
+	 * コンストラクタ
+	 * @param classSet
+	 */
 	public MethodChecker(Set<Class<?>> classSet) {
 		this.classSet = classSet;
 	}
@@ -131,17 +136,20 @@ public class MethodChecker {
 	 */
 	private Object getClassInstance(Class<?> cls) {
 		Init init = null;
+		boolean access;
 		Constructor<?> constructor = null;
 		// まずコンストラクタにアノーテーションがついているかチェック。
-		for(Constructor<?> construct : cls.getConstructors()) {
+		for(Constructor<?> construct : cls.getDeclaredConstructors()) {
 			init = construct.getAnnotation(Init.class);
 			if(init != null) {
 				constructor = construct;
 				break;
 			}
 		}
-		if(init != null) {
-			try {
+		access = constructor.isAccessible();
+		constructor.setAccessible(true);
+		try {
+			if(init != null) {
 				List<Object> dataList = new ArrayList<Object>();
 				List<String> paramList = new ArrayList<String>();
 				// データリストの作成
@@ -155,22 +163,18 @@ public class MethodChecker {
 				}
 				return constructor.newInstance(dataList.toArray());
 			}
-			catch (Exception e) {
-				e.printStackTrace(System.out);
-				fail(e.getClass().getName());
-				return null;
-			}
-		}
-		else {
-			try {
+			else {
 				// アノーテーション指定がない。
 				return cls.newInstance();
 			}
-			catch (Exception e) {
-				e.printStackTrace(System.out);
-				fail(e.getClass().getName());
-				return null;
-			}
+		}
+		catch (Exception e) {
+			e.printStackTrace(System.out);
+			fail(e.getClass().getName());
+			return null;
+		}
+		finally {
+			constructor.setAccessible(access);
 		}
 	}
 }
