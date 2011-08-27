@@ -58,6 +58,10 @@ Junitによるテストは便利なんですが、記述をするのが面倒な
 * 任意のオブジェクト <pre>EntryクラスのsetUpメソッド内でsetData関数により特定のkeyに対応するvalueをセットしておくと、"#key"という形で利用できる。</pre>
 * クラス <pre>"$java.lang.String"という風に$を頭にいれると対象クラスオブジェクトを渡すことができる。</pre>
 
+<pre>フォーマット指定は
+boolean, char*, byte, short, int, long, float, double, string
+charは動作に問題があるはずなので使わないこと推奨</pre>
+
 ###assumeの定義データ
 * @none <pre>出力データの確認なし。何があろうとそのままテストを実行する。</pre>
 * @ok <pre>出力データの確認なし。例外が発生した場合はテストを中断する。</pre>
