@@ -11,18 +11,41 @@ Junitによるテストは便利なんですが、記述をするのが面倒な
 ## 使い方
 1. eclipseのプロジェクトにJunit4のライブラリを追加。
 2. さらにjunitTest.jarも追加。
+3. Entry用のクラスを１つ書いておく。
 
+`package com.project.test;
+
+/**
+ * テスト動作
+ */
+public class DevelopTestEntry extends TestEntry {
+	/**
+	 * 初期準備
+	 */
+	@Override
+	public void setUp() throws Exception {
+		setPackagePath("com.project.library");
+		super.setUp();
+	}
+	/**
+	 * テスト実行
+	 */
+	@Override
+	public void doTest() {
+		super.doTest();
+	}
+}`
+
+4. おしまい。
 
 
 ## ライセンス
 一応LGPLということにしておきます。なにか問題がでた場合は適宜変更する予定
 
 ## 履歴
-2011.08.25 Junitについて知る。酔った勢いでライブラリをつくってみる。
-
-2011.08.26 共有のためgithubに公開、会社でつかってみたところ初期化がだめすぎて、使えない。
-
-2011.08.27 いろいろ機能を追加
+* 2011.08.25 Junitについて知る。酔った勢いでライブラリをつくってみる。
+* 2011.08.26 共有のためgithubに公開、会社でつかってみたところ初期化がだめすぎて、使えない。
+* 2011.08.27 いろいろ機能を追加
 
 ## やることメモ
 * ほかのプログラムを作成しつつ、なにか欲しい機能が増えたら互換性を残しつつバージョンをあげていく。
