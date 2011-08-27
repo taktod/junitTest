@@ -488,7 +488,7 @@ public class MethodChecker {
 	 * @param type
 	 * @return
 	 */
-	@Junit({
+/*	@Junit({
 		@Test("$java.lang.String"),
 		@Test(value={"$java.lang.Integer"}, assume="ok"),
 	})// */
