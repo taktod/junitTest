@@ -22,8 +22,11 @@ import java.lang.annotation.RetentionPolicy;
  * @dump 応答データを標準出力にだす。チェックはしない。(できた)
  * @Exception 例外(できた)
  */
+/**
+ * テスト用の定義アノーテーション
+ */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Test {
-	String[] params();
-	String assume() default "@none";
+	String[] value();
+	String assume() default "@dump"; // デフォルトはデータDumpにしておく。
 }

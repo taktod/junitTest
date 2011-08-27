@@ -18,9 +18,14 @@ import com.ttProject.junit.annotation.Test;
 
 import static org.junit.Assert.*;
 
+/**
+ * 関数定義をアノーテーションに従って調査して応答を返す。
+ * @author taktod
+ */
 public class MethodChecker {
 	/** チェック対象クラス */
 	private Set<Class<?>> classSet = null;
+	/** #keyで登録されているデータ */
 	private Map<String, Object>dataMap = null;
 	/**
 	 * コンストラクタ
@@ -59,7 +64,7 @@ public class MethodChecker {
 				List<Object> dataList = new ArrayList<Object>();
 				List<String> paramList = new ArrayList<String>();
 				// データリストの作成
-				for(String str : testEntry.params()) {
+				for(String str : testEntry.value()) {
 					paramList.add(str);
 				}
 				// 文字列のデータリストを関数のパラメーター定義に合わせて変換
@@ -483,9 +488,9 @@ public class MethodChecker {
 	 * @param type
 	 * @return
 	 */
-/*	@Junit({
-		@Test(params="$java.lang.String"),
-		@Test(params="$java.lang.Integer"),
+	@Junit({
+		@Test("$java.lang.String"),
+		@Test(value={"$java.lang.Integer"}, assume="ok"),
 	})// */
 	private Object getClassInstance(Class<?> cls) {
 		Init init = null;
