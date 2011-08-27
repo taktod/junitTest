@@ -30,11 +30,9 @@ public class TestEntry {
 			e.printStackTrace();
 		}
 	}
-
 	@After
 	public void tearDown() throws Exception {
 	}
-
 	@Test
 	public void test() {
 		if(checker == null) {
