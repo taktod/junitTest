@@ -35,7 +35,11 @@ public class ClassFinder {
 			}
 			else {
 				// packageのpathをFile pathに変更する。
-				String dir = path + DIR_SEPARATOR + targetPath.replaceAll(PACKAGE_SEPARATOR, DIR_SEPARATOR);
+//				String dir = path + DIR_SEPARATOR + targetPath.replaceAll(PACKAGE_SEPARATOR, DIR_SEPARATOR);
+				String dir = path;
+				for(String str : targetPath.split(PACKAGE_SEPARATOR)) {
+					dir += DIR_SEPARATOR + str;
+				}
 				try {
 					File directory = new File(dir);
 					findClass(classSet, directory, targetPath);
