@@ -1,12 +1,12 @@
 package com.ttProject.junit.library;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +18,6 @@ import com.ttProject.junit.annotation.Test;
 
 import static org.junit.Assert.*;
 
-@SuppressWarnings("unused")
 public class MethodChecker {
 	/** チェック対象クラス */
 	private Set<Class<?>> classSet = null;
@@ -134,15 +133,13 @@ public class MethodChecker {
 			}
 		}
 	}
+	/**
+	 * テストに利用するパラメーターを取得する。
+	 * @param type 欲しいパラメーター(関数定義より読み込む。)
+	 * @param obj 文字列指定(Testアノーテーションから取得)
+	 * @return データ
+	 */
 	private Object getTestParam(Class<?> type, String obj) {
-		/*
-		 * ArrayList<String> isArray:false
-		 * String[] set :true
-		 * String... set :true
-		 * Set<String> set :false
-		 * ...
-		 * 配列の扱いもなんとかしないといけない。
-		 */
 		// nullチェック
 		if(obj == null || "null".equals(obj)) {
 			return null;
@@ -201,15 +198,95 @@ public class MethodChecker {
 		}
 		// リスト
 		if(List.class.isAssignableFrom(type)) {
+			return makeList(obj);
 		}
-		// セット
+		// セット	
 		if(Set.class.isAssignableFrom(type)) {
+			return makeSet(obj);
 		}
 		// マップ
 		if(Map.class.isAssignableFrom(type)) {
+			return makeMap(obj);
 		}
 		// それ以外のクラスの場合、そこにInitのアノーテーション指定があるなら、その初期化方法で、それ以外の場合はデフォルトコンストラクタを利用して。おく。
 		return getClassInstance(type);
+	}
+	/**
+	 * 文字列定義からHashMapを作成して応答する。
+	 * @param obj
+	 * @return
+	 */
+/*	@Junit({
+		@Test(params="string->string", assume="@dump"),
+		@Test(params="string->string[a->b]", assume="@dump"),
+		@Test(params="string->int[a->12]", assume="@dump"),
+		@Test(params="long->string[153->test]", assume="@dump"),
+	}) // */
+	private Object makeMap(String obj) {
+		if(!obj.contains("[")) {
+			return null;
+		}
+		String[] type = obj.split("\\[", 2);
+		// typeの部分はkey->value[a->b][c->d]...という形になっている。
+		Constructor<?> constructKey, constructValue;
+		try {
+			String[] types = type[0].split("->");
+			constructKey = getElementType(types[0]);
+			constructValue = getElementType(types[1]);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		String[] array = getElementArray(obj);
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		Object key, value;
+		for(String str : array) {
+			try {
+				String[] data = str.split("->");
+				try {
+					key = constructKey.newInstance(data[0]);
+				}
+				catch (Exception e) {
+					key = data[0];
+				}
+				try {
+					value = constructValue.newInstance(data[1]);
+				}
+				catch (Exception e) {
+					value = data[1];
+				}
+				map.put(key, value);
+			}
+			catch (Exception e) {
+			}
+		}
+		return map;
+	}
+	/**
+	 * 文字列定義からHashSetを作成して応答する。
+	 * @param obj
+	 * @return
+	 */
+/*	@Junit({
+		@Test(params={"byte[12][23][35][21]"}, assume="@dump"),
+	}) // */
+	private Object makeSet(String obj) {
+		if(!obj.contains("[")) {
+			return null;
+		}
+		String[] type = obj.split("\\[", 2);
+		Constructor<?> construct = getElementType(type[0]);
+		String[] array = getElementArray(obj);
+		Set<Object> set = new HashSet<Object>();
+		for(String str : array) {
+			try {
+				set.add(construct.newInstance(str));
+			}
+			catch (Exception e) {
+			}
+		}
+		return set;
 	}
 	/**
 	 * 文字列定義からArrayListを作成して応答する。
@@ -256,8 +333,6 @@ public class MethodChecker {
 			return null;
 		}
 		String target = resultType.getName();
-		String[] type = obj.split("\\[", 2);
-		Constructor<?> construct = getElementType(type[0]);
 		String[] array = getElementArray(obj);
 		try {
 			if("[Z".equals(target)) {
@@ -470,6 +545,7 @@ public class MethodChecker {
 	 * @param obj
 	 */
 	private void dumpAll(Object obj) {
+		System.out.println(obj.getClass().getSimpleName());
 		if(obj instanceof Object[]) {
 			for(Object ob : (Object[])obj) {
 				System.out.println(ob);
