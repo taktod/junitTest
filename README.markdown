@@ -55,7 +55,7 @@ Junitによるテストは便利なんですが、記述をするのが面倒な
 * List <pre>"フォーマット[要素1][要素2]..."の形で定義すると、そのArrayListになる。</pre>
 * Set <pre>"フォーマット[要素1][要素2]..."の形で定義すると、そのHashSetになる。</pre>
 * Map <pre>"フォーマット->フォーマット[key1->value1][key2->value2]..."の形で定義すると、そのHashMapになる。</pre>
-* 任意のオブジェクト <pre>EntryクラスのsetUpメソッド内でsetData関数により特定のkeyに対応するvalueをセットしておくと、"#key"という形で利用できる。<pre>
+* 任意のオブジェクト <pre>EntryクラスのsetUpメソッド内でsetData関数により特定のkeyに対応するvalueをセットしておくと、"#key"という形で利用できる。</pre>
 * クラス <pre>"$java.lang.String"という風に$を頭にいれると対象クラスオブジェクトを渡すことができる。</pre>
 
 ###assumeの定義データ
