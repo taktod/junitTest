@@ -1,6 +1,7 @@
 package com.ttProject.junit.library;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -17,12 +18,14 @@ import static org.junit.Assert.*;
 public class MethodChecker {
 	/** チェック対象クラス */
 	private Set<Class<?>> classSet = null;
+	private Map<String, Object>dataMap = null;
 	/**
 	 * コンストラクタ
 	 * @param classSet
 	 */
-	public MethodChecker(Set<Class<?>> classSet) {
+	public MethodChecker(Set<Class<?>> classSet, Map<String, Object>dataMap) {
 		this.classSet = classSet;
+		this.dataMap = dataMap;
 	}
 	/**
 	 * 検査スタート
@@ -95,13 +98,21 @@ public class MethodChecker {
 			}
 			catch (Exception e) {
 				String assume = testEntry.assume();
-				System.out.println(assume);
+				if(e instanceof InvocationTargetException) {
+					e.getCause().printStackTrace(System.out);
+				}
+				else {
+					e.printStackTrace(System.out);
+				}
+				if(assume.equals("@none")) {
+					System.out.println("assume : @none");
+					System.out.println("...passed...");
+					continue;
+				}
 				if(assume.indexOf("Exception") != -1) {
 					try {
 						assume = assume.substring(1);
-						System.out.println(assume);
-						if((e.getClass().getName().indexOf(assume) != -1)
-							|| (e.getCause().getClass().getName().indexOf(assume) != -1)
+						if((e.getCause().getClass().getName().indexOf(assume) != -1)
 							|| (e.getCause().getCause().getClass().getName().indexOf(assume) != -1)) {
 							// 指定されている例外が存在する場合はOK
 							System.out.println("find the exception : " + testEntry.assume());
@@ -112,7 +123,6 @@ public class MethodChecker {
 					catch (Exception ex) {
 					}
 				}
-				e.printStackTrace(System.out);
 				System.out.println("Failed....");
 				fail("interruptted by " + e.getClass().getName());
 				return;
@@ -120,8 +130,19 @@ public class MethodChecker {
 		}
 	}
 	private Object getTestParam(Class<?> type, String obj) {
+		/*
+		 * ArrayList<String> isArray:false
+		 * String[] set :true
+		 * String... set :true
+		 * Set<String> set :false
+		 * ...
+		 * 配列の扱いもなんとかしないといけない。
+		 */
 		if(obj == null || "null".equals(obj)) {
 			return null;
+		}
+		if(obj.startsWith("#")) {
+			return dataMap.get(obj.substring(1));
 		}
 		if(type == String.class) {
 			return obj;

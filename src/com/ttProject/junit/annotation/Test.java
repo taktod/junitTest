@@ -9,6 +9,8 @@ import java.lang.annotation.RetentionPolicy;
  * "@string[abc][test][gesg][trsy]" hashSetにする。型は自分で宣言する必要あり。(省略時はString強制)
  * "$string@string[a->test][b->hello]" hashMapにする。型は自分で宣言する必要あり。(省略時はString強制 keyもvalも)
  * つかえる型はchar byte short int long double float string
+ * あらかじめMapにデータをセットしておいて、そのデータを参照することも可
+ * "#data"この場合はsetUpで所定のHashMapにデータを入れる必要あり。(できた)
  * 使える型は
  * *[は入力文字に指定不可
  * assumeはあるべき結果
