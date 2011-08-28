@@ -59,9 +59,10 @@ public class TestEntry {
 	}
 	/**
 	 * 実行実体
+	 * @throws Throwable 
 	 */
 	@Test
-	public void doTest() {
+	public void doTest() throws Throwable {
 		if(checker == null) {
 			org.junit.Assert.fail("Checker object is null...");
 		}

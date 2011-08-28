@@ -38,8 +38,9 @@ public class MethodChecker {
 	}
 	/**
 	 * 検査スタート
+	 * @throws Throwable 
 	 */
-	public void checkStart() {
+	public void checkStart() throws Throwable {
 		for(Class<?> cls : classSet) {
 			for(Method m : cls.getDeclaredMethods()) {
 				if(m.getAnnotation(Junit.class) != null) {
@@ -55,8 +56,9 @@ public class MethodChecker {
 	 * 関数を確認する。
 	 * @param cls
 	 * @param method
+	 * @throws Throwable 
 	 */
-	private void checkMethod(Class<?> cls, Method method) {
+	private void checkMethod(Class<?> cls, Method method) throws Throwable {
 		// 入力データ
 		Junit test = method.getAnnotation(Junit.class);
 		for(Test testEntry : test.value()) {
@@ -133,8 +135,9 @@ public class MethodChecker {
 					}
 				}
 				System.out.println("Failed....");
-				fail("interruptted by " + e.getClass().getName());
-				return;
+//				fail("interruptted by " + e.getClass().getName());
+//				return;
+				throw e.getCause();
 			}
 		}
 	}

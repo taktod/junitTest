@@ -18,16 +18,20 @@ public class DevelopTestEntry extends TestEntry {
 	}
 	/**
 	 * テスト実行
+	 * @throws Throwable 
 	 */
 	@Override
-	public void doTest() {
+	public void doTest() throws Throwable {
 		super.doTest();
 	}
 
 	@Junit({
-		@Test({"test", "true"})
+		@Test({"test", "false"})
 	})
 	public String doSomething(String str, boolean flg) {
+		if(!flg) {
+			throw new RuntimeException("hogehoge");
+		}
 		return str + ":" + flg;
 	}
 }
