@@ -1,5 +1,7 @@
 package com.ttProject.junit;
 
+import static org.junit.Assert.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +66,7 @@ public class TestEntry {
 	@Test
 	public void doTest() throws Throwable {
 		if(checker == null) {
-			org.junit.Assert.fail("Checker object is null...");
+			fail("Checker object is null...");
 		}
 		checker.checkStart();
 	}
