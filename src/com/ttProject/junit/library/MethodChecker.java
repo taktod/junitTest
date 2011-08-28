@@ -31,10 +31,17 @@ public class MethodChecker {
 	 * コンストラクタ
 	 * @param classSet
 	 */
-	@Init({"null", "null"})
 	public MethodChecker(Set<Class<?>> classSet, Map<String, Object>dataMap) {
 		this.classSet = classSet;
 		this.dataMap = dataMap;
+	}
+	/**
+	 * コンストラクタ
+	 */
+	@Init({})
+	public MethodChecker() {
+		classSet = null;
+		dataMap = null;
 	}
 	/**
 	 * 検査スタート
@@ -487,7 +494,7 @@ public class MethodChecker {
 		return result;
 	}
 	/**
-	 * 対象クラスのデフォルトインスタンスを生成する。
+	 * 対象クラスのデフォルトインスタンスを生成する。(検証対象のコンストラクタで利用できるようにこのメソッドはpublicにしておく。)
 	 * @param type
 	 * @return
 	 */
@@ -495,7 +502,7 @@ public class MethodChecker {
 		@Test("$java.lang.String"),
 		@Test(value={"$java.lang.Integer"}, assume="ok"),
 	})// */
-	private Object getClassInstance(Class<?> cls) {
+	public Object getClassInstance(Class<?> cls) {
 		Init init = null;
 		Boolean access = null;
 		Constructor<?> constructor = null;
