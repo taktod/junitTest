@@ -26,7 +26,10 @@ public class DevelopTestEntry extends TestEntry {
 	}
 
 	@Junit({
-		@Test({"test", "false"})
+		@Test(value={"hello", "true"}, assume="hello:true"),
+		@Test({"hey", "true"}),
+		@Test(value={"hi", "false"}, assume="@RuntimeException"),
+		@Test({"wow", "false"}),
 	})
 	public String doSomething(String str, boolean flg) {
 		if(!flg) {

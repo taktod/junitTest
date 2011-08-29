@@ -15,6 +15,7 @@ import java.util.Set;
 import com.ttProject.junit.annotation.Init;
 import com.ttProject.junit.annotation.Junit;
 import com.ttProject.junit.annotation.Test;
+import com.ttProject.junit.exception.ConstructorNotFoundException;
 
 import static org.junit.Assert.*;
 
@@ -51,7 +52,7 @@ public class MethodChecker {
 		for(Class<?> cls : classSet) {
 			for(Method m : cls.getDeclaredMethods()) {
 				if(m.getAnnotation(Junit.class) != null) {
-					System.out.println("check for class:(" + cls.getSimpleName() + ") method:(" + m.getName() + ")");
+					System.out.println("[check for class:(" + cls.getName() + ") method:(" + m.getName() + ")]");
 					// 実行すべきMethod
 					checkMethod(cls, m);
 					System.out.println();
@@ -77,17 +78,19 @@ public class MethodChecker {
 					paramList.add(str);
 				}
 				// 文字列のデータリストを関数のパラメーター定義に合わせて変換
-				System.out.print("param : ");
+				System.out.print("[param : ");
 				for(Class<?> type : method.getParameterTypes()) {
 					String param = paramList.remove(0);
 					System.out.print(param);
 					System.out.print(" ");
 					dataList.add(getTestParam(type, param));
 				}
-				System.out.println();
+				System.out.println("]");
 				Object ret = null;
 				boolean access = method.isAccessible();
 				method.setAccessible(true);
+
+				System.out.println();
 				if(Modifier.isStatic(method.getModifiers())) {
 					// static関数
 					ret = method.invoke(null, dataList.toArray());
@@ -98,33 +101,32 @@ public class MethodChecker {
 				}
 				method.setAccessible(access);
 				String assume = testEntry.assume();
-				System.out.println("assume : " + assume + " result : " + ret);
+				System.out.println("[assume : " + assume + " result : " + ret + "]");
+				if(assume.equals("@dump")) {
+					dumpAll(ret);
+					System.out.println();
+					continue;
+				}
 				if(ret == null) {
 					ret = "null";
 				}
-				if(assume.equals("@dump")) {
-					dumpAll(ret);
-				}
-				else if(assume.equals("@none") || assume.equals("@ok") || assume.equals(ret.toString())) {
-					System.out.println("...passed...");
+				if(assume.equals("@none") || assume.equals("@ok") || assume.equals(ret.toString())) {
+					System.out.println("[...passed...]");
+					System.out.println();
 				}
 				else {
-					System.out.println("value is corrupted...");
+					System.out.println("[value is corrupted...]");
 					fail("value is corrupted...");
 					return;
 				}
 			}
-			catch (Exception e) {
+			catch (InvocationTargetException e) {
 				String assume = testEntry.assume();
-				if(e instanceof InvocationTargetException) {
-					e.getCause().printStackTrace(System.out);
-				}
-				else {
-					e.printStackTrace(System.out);
-				}
+				e.getCause().printStackTrace(System.out);
 				if(assume.equals("@none")) {
-					System.out.println("assume : @none");
-					System.out.println("...passed...");
+					System.out.println("[assume : @none]");
+					System.out.println("[...passed...]");
+					System.out.println();
 					continue;
 				}
 				if(assume.indexOf("Exception") != -1) {
@@ -133,18 +135,26 @@ public class MethodChecker {
 						if((e.getCause().getClass().getName().indexOf(assume) != -1)
 							|| (e.getCause().getCause().getClass().getName().indexOf(assume) != -1)) {
 							// 指定されている例外が存在する場合はOK
-							System.out.println("find the exception : " + testEntry.assume());
-							System.out.println("...passed...");
+							System.out.println("[find the exception : " + testEntry.assume() + "]");
+							System.out.println("[...passed...]");
+							System.out.println();
 							continue;
 						}
 					}
 					catch (Exception ex) {
 					}
 				}
-				System.out.println("Failed....");
-//				fail("interruptted by " + e.getClass().getName());
-//				return;
+				System.out.println("[Failed...]");
 				throw e.getCause();
+			}
+			catch (ConstructorNotFoundException e) {
+				System.out.println("[Cannot find the constructor for " + e.getMessage() + "]");
+				System.out.println("[Failed...]");
+				fail("Cannot find the constactor for " + e.getMessage());
+			}
+			catch (Exception e) {
+				e.printStackTrace(System.out);
+				throw e;
 			}
 		}
 	}
@@ -153,8 +163,9 @@ public class MethodChecker {
 	 * @param type 欲しいパラメーター(関数定義より読み込む。)
 	 * @param obj 文字列指定(Testアノーテーションから取得)
 	 * @return データ
+	 * @throws InvocationTargetException 
 	 */
-	private Object getTestParam(Class<?> type, String obj) {
+	private Object getTestParam(Class<?> type, String obj) throws InvocationTargetException {
 		// nullチェック
 		if(obj == null || "null".equals(obj)) {
 			return null;
@@ -223,8 +234,12 @@ public class MethodChecker {
 		if(Map.class.isAssignableFrom(type)) {
 			return makeMap(obj);
 		}
-		// それ以外のクラスの場合、そこにInitのアノーテーション指定があるなら、その初期化方法で、それ以外の場合はデフォルトコンストラクタを利用して。おく。
-		return getClassInstance(type);
+		try {
+			return getClassInstance(type);
+		}
+		catch (ConstructorNotFoundException e) {
+			return null;
+		}
 	}
 	/**
 	 * 文字列定義からHashMapを作成して応答する。
@@ -497,12 +512,14 @@ public class MethodChecker {
 	 * 対象クラスのデフォルトインスタンスを生成する。(検証対象のコンストラクタで利用できるようにこのメソッドはpublicにしておく。)
 	 * @param type
 	 * @return
+	 * @throws ConstructorNotFoundException 
+	 * @throws InvocationTargetException 
 	 */
 /*	@Junit({
 		@Test("$java.lang.String"),
 		@Test(value={"$java.lang.Integer"}, assume="ok"),
 	})// */
-	public Object getClassInstance(Class<?> cls) {
+	public Object getClassInstance(Class<?> cls) throws ConstructorNotFoundException, InvocationTargetException {
 		Init init = null;
 		Boolean access = null;
 		Constructor<?> constructor = null;
@@ -520,7 +537,7 @@ public class MethodChecker {
 			}
 		}
 		if(constructor == null) {
-			return null;
+			throw new ConstructorNotFoundException(cls.getName());
 		}
 		access = constructor.isAccessible();
 		constructor.setAccessible(true);
@@ -544,6 +561,9 @@ public class MethodChecker {
 				return constructor.newInstance();
 			}
 		}
+		catch (InvocationTargetException e) {
+			throw e;
+		}
 		catch (Exception e) {
 			e.printStackTrace(System.out);
 			fail(e.getClass().getName());
@@ -560,6 +580,10 @@ public class MethodChecker {
 	 * @param obj
 	 */
 	private void dumpAll(Object obj) {
+		if(obj == null) {
+			System.out.println("null");
+			return;
+		}
 		System.out.println(obj.getClass().getSimpleName());
 		if(obj instanceof Object[]) {
 			for(Object ob : (Object[])obj) {
