@@ -104,6 +104,7 @@ public class MethodChecker {
 				System.out.println("[assume : " + assume + " result : " + ret + "]");
 				if(assume.equals("@dump")) {
 					dumpAll(ret);
+					System.out.println("[...passed...]");
 					System.out.println();
 					continue;
 				}
