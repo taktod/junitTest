@@ -78,4 +78,13 @@ public class TestEntry {
 	public boolean dump(Object obj) {
 		return true;
 	}
+	/**
+	 * 動作の返答に問題があるかどうかを特別な判定を行う場合はここで処理する。
+	 * assume=@custom(適当な判定式)を指定する必要あり。
+	 * @param ret
+	 * @return
+	 */
+	public boolean customCheck(String assume, Object ret) {
+		return true;
+	}
 }

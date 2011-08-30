@@ -116,6 +116,13 @@ public class MethodChecker {
 					System.out.println();
 					continue;
 				}
+				if(assume.startsWith("@custom")) {
+					if(entry.customCheck(assume, ret)) {
+						continue;
+					}
+					fail("custom check returns false...");
+					return;
+				}
 				if(ret == null) {
 					ret = "null";
 				}
