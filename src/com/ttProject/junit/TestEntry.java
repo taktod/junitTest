@@ -47,7 +47,7 @@ public class TestEntry {
 	public void setUp() throws Exception {
 		try {
 			ClassFinder cf = new ClassFinder();
-			checker = new MethodChecker(cf.getAppClass(packagePath), extraData);
+			checker = new MethodChecker(cf.getAppClass(packagePath), extraData, this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -69,5 +69,13 @@ public class TestEntry {
 			fail("Checker object is null...");
 		}
 		checker.checkStart();
+	}
+	/**
+	 * Dump時に特別なデータを表示したいときにはこれを使う。
+	 * @param obj
+	 * @return true:標準Dumpも追加する。
+	 */
+	public boolean dump(Object obj) {
+		return true;
 	}
 }

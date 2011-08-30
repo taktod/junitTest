@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ttProject.junit.TestEntry;
 import com.ttProject.junit.annotation.Init;
 import com.ttProject.junit.annotation.Junit;
 import com.ttProject.junit.annotation.Test;
@@ -28,13 +29,16 @@ public class MethodChecker {
 	private Set<Class<?>> classSet = null;
 	/** #keyで登録されているデータ */
 	private Map<String, Object>dataMap = null;
+	/** プロジェクト定義の応答用サポート */
+	private TestEntry entry;
 	/**
 	 * コンストラクタ
 	 * @param classSet
 	 */
-	public MethodChecker(Set<Class<?>> classSet, Map<String, Object>dataMap) {
+	public MethodChecker(Set<Class<?>> classSet, Map<String, Object>dataMap, TestEntry entry) {
 		this.classSet = classSet;
 		this.dataMap = dataMap;
+		this.entry = entry;
 	}
 	/**
 	 * コンストラクタ
@@ -597,6 +601,9 @@ public class MethodChecker {
 	private void dumpAll(Object obj) {
 		if(obj == null) {
 			System.out.println("null");
+			return;
+		}
+		if(!entry.dump(obj)) {
 			return;
 		}
 		System.out.println(obj.getClass().getSimpleName());
