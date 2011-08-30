@@ -30,11 +30,14 @@ public class MethodChecker {
 	/** #keyで登録されているデータ */
 	private Map<String, Object>dataMap = null;
 	/** プロジェクト定義の応答用サポート */
-	private TestEntry entry;
+	private TestEntry entry = null;
 	/**
 	 * コンストラクタ
 	 * @param classSet
+	 * @param dataMap
+	 * @param entry
 	 */
+	@Init({"null", "null", "null"})
 	public MethodChecker(Set<Class<?>> classSet, Map<String, Object>dataMap, TestEntry entry) {
 		this.classSet = classSet;
 		this.dataMap = dataMap;
@@ -43,16 +46,19 @@ public class MethodChecker {
 	/**
 	 * コンストラクタ
 	 */
-	@Init({})
 	public MethodChecker() {
-		classSet = null;
-		dataMap = null;
 	}
 	/**
 	 * 検査スタート
 	 * @throws Throwable 
 	 */
+	@Junit({
+		@Test(assume="@RuntimeException")
+	})
 	public void checkStart() throws Throwable {
+		if(classSet == null || dataMap == null) {
+			throw new RuntimeException("Method checker miss the preset data...");
+		}
 		for(Class<?> cls : classSet) {
 			for(Method m : cls.getDeclaredMethods()) {
 				if(m.getAnnotation(Junit.class) != null) {
@@ -76,12 +82,13 @@ public class MethodChecker {
 		for(Test testEntry : test.value()) {
 			try {
 				List<Object> dataList = new ArrayList<Object>();
+				// パラメータセットアップ
 				List<String> paramList = new ArrayList<String>();
-				List<String> constructorParamList = new ArrayList<String>();
-				// データリストの作成
 				for(String str : testEntry.value()) {
 					paramList.add(str);
 				}
+				// コンストラクタのパラメータセットアップ
+				List<String> constructorParamList = new ArrayList<String>();
 				for(String str : testEntry.init()) {
 					constructorParamList.add(str);
 				}
@@ -94,28 +101,33 @@ public class MethodChecker {
 					dataList.add(getTestParam(type, param));
 				}
 				System.out.println("]");
+				System.out.println();
+
 				Object ret = null;
 				boolean access = method.isAccessible();
 				method.setAccessible(true);
-
-				System.out.println();
+				// static関数
 				if(Modifier.isStatic(method.getModifiers())) {
-					// static関数
 					ret = method.invoke(null, dataList.toArray());
 				}
+				// 一般関数
 				else {
-					// 一般関数 (new Instanceの部分初期か方法が指定されている場合はそっちにあわせる。)
 					ret = method.invoke(getClassInstance(cls, constructorParamList), dataList.toArray());
 				}
 				method.setAccessible(access);
+				
+				// 結果表示
 				String assume = testEntry.assume();
 				System.out.println("[assume : " + assume + " result : " + ret + "]");
+				// 結果チェック
+				// 結果全Dump
 				if(assume.equals("@dump")) {
 					dumpAll(ret);
 					System.out.println("[...passed...]");
 					System.out.println();
 					continue;
 				}
+				// プロジェクト固有チェック
 				if(assume.startsWith("@custom")) {
 					if(entry.customCheck(assume, ret)) {
 						continue;
@@ -123,28 +135,35 @@ public class MethodChecker {
 					fail("custom check returns false...");
 					return;
 				}
+				// nullを文字列にラップしておく。
 				if(ret == null) {
 					ret = "null";
 				}
+				// 特に表示させるデータがない場合と特定文字列と一致する場合
 				if(assume.equals("@none") || assume.equals("@ok") || assume.equals(ret.toString())) {
 					System.out.println("[...passed...]");
 					System.out.println();
 				}
+				// 特定文字列と一致しない場合はエラー
 				else {
 					System.out.println("[value is corrupted...]");
 					fail("value is corrupted...");
 					return;
 				}
 			}
+			// テストしたメソッドにエラーがある場合
 			catch (InvocationTargetException e) {
 				String assume = testEntry.assume();
+				// エラー内容を表示
 				e.getCause().printStackTrace(System.out);
+				// 例外時も処理をしない場合
 				if(assume.equals("@none")) {
 					System.out.println("[assume : @none]");
 					System.out.println("[...passed...]");
 					System.out.println();
 					continue;
 				}
+				// 特定の例外を期待している場合
 				if(assume.indexOf("Exception") != -1) {
 					try {
 						assume = assume.substring(1);
@@ -163,11 +182,13 @@ public class MethodChecker {
 				System.out.println("[Failed...]");
 				throw e.getCause();
 			}
+			// テスト対象のクラスの初期化に失敗した場合
 			catch (ConstructorNotFoundException e) {
 				System.out.println("[Cannot find the constructor for " + e.getMessage() + "]");
 				System.out.println("[Failed...]");
 				fail("Cannot find the constactor for " + e.getMessage());
 			}
+			// その他の不明なエラーの場合
 			catch (Exception e) {
 				e.printStackTrace(System.out);
 				throw e;
@@ -250,6 +271,7 @@ public class MethodChecker {
 		if(Map.class.isAssignableFrom(type)) {
 			return makeMap(obj);
 		}
+		// クラス
 		try {
 			return getClassInstance(type);
 		}
@@ -524,15 +546,23 @@ public class MethodChecker {
 		}
 		return result;
 	}
+	/**
+	 * 対象クラスのデフォルトインスタンスを生成する。(検証対象のコンストラクタで利用できるようにこのメソッドはpublicにしておく。)
+	 * @param cls
+	 * @return
+	 * @throws ConstructorNotFoundException
+	 * @throws InvocationTargetException
+	 */
 	public Object getClassInstance(Class<?> cls) throws ConstructorNotFoundException, InvocationTargetException {
 		return getClassInstance(cls, null);
 	}
 	/**
-	 * 対象クラスのデフォルトインスタンスを生成する。(検証対象のコンストラクタで利用できるようにこのメソッドはpublicにしておく。)
-	 * @param type
+	 * 対象クラスのデフォルトインスタンスを生成する。パラメーターを別途指定することも可能
+	 * @param cls
+	 * @param constructorParamList
 	 * @return
-	 * @throws ConstructorNotFoundException 
-	 * @throws InvocationTargetException 
+	 * @throws ConstructorNotFoundException
+	 * @throws InvocationTargetException
 	 */
 /*	@Junit({
 		@Test("$java.lang.String"),
@@ -610,9 +640,11 @@ public class MethodChecker {
 			System.out.println("null");
 			return;
 		}
-		if(!entry.dump(obj)) {
+		// カスタムDump
+		if(entry != null && !entry.dump(obj)) {
 			return;
 		}
+		// デフォルトDump
 		System.out.println(obj.getClass().getSimpleName());
 		if(obj instanceof Object[]) {
 			for(Object ob : (Object[])obj) {

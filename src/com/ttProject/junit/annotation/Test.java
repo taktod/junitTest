@@ -9,6 +9,6 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Test {
 	String[] init() default {}; // デフォルトデータはnull配列にしておく。
-	String[] value();
+	String[] value() default {};
 	String assume() default "@dump"; // デフォルトはデータDumpにしておく。
 }
