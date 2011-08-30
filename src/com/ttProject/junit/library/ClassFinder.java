@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.ttProject.junit.annotation.Junit;
+import com.ttProject.junit.annotation.Test;
 
 /**
  * 前準備としてクラス情報を取得する。
@@ -24,6 +25,10 @@ public class ClassFinder {
 	 * @param targetPath
 	 * @return
 	 */
+	@Junit({
+		@Test(value="com.ttProject.junit", assume="@ok"), // このプロジェクトにセットされているテスト項目が引っ掛かるのを期待する。
+		@Test(value="com.ooProject.junit", assume="@ok"), // プロジェクト名が一致しないので何も返さないことを期待するただし例外はでない。
+	})
 	public Set<Class<?>> getAppClass(String targetPath) {
 		Set<Class<?>> classSet = new HashSet<Class<?>>();
 		String pathes = System.getProperty("java.class.path");
@@ -35,7 +40,6 @@ public class ClassFinder {
 			}
 			else {
 				// packageのpathをFile pathに変更する。
-//				String dir = path + DIR_SEPARATOR + targetPath.replaceAll(PACKAGE_SEPARATOR, DIR_SEPARATOR);
 				String dir = path;
 				for(String str : targetPath.split(PACKAGE_SEPARATOR)) {
 					dir += DIR_SEPARATOR + str;
