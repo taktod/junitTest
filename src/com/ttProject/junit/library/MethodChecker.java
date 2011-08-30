@@ -73,9 +73,13 @@ public class MethodChecker {
 			try {
 				List<Object> dataList = new ArrayList<Object>();
 				List<String> paramList = new ArrayList<String>();
+				List<String> constructorParamList = new ArrayList<String>();
 				// データリストの作成
 				for(String str : testEntry.value()) {
 					paramList.add(str);
+				}
+				for(String str : testEntry.init()) {
+					constructorParamList.add(str);
 				}
 				// 文字列のデータリストを関数のパラメーター定義に合わせて変換
 				System.out.print("[param : ");
@@ -97,7 +101,7 @@ public class MethodChecker {
 				}
 				else {
 					// 一般関数 (new Instanceの部分初期か方法が指定されている場合はそっちにあわせる。)
-					ret = method.invoke(getClassInstance(cls), dataList.toArray());
+					ret = method.invoke(getClassInstance(cls, constructorParamList), dataList.toArray());
 				}
 				method.setAccessible(access);
 				String assume = testEntry.assume();
@@ -509,6 +513,9 @@ public class MethodChecker {
 		}
 		return result;
 	}
+	public Object getClassInstance(Class<?> cls) throws ConstructorNotFoundException, InvocationTargetException {
+		return getClassInstance(cls, null);
+	}
 	/**
 	 * 対象クラスのデフォルトインスタンスを生成する。(検証対象のコンストラクタで利用できるようにこのメソッドはpublicにしておく。)
 	 * @param type
@@ -520,7 +527,7 @@ public class MethodChecker {
 		@Test("$java.lang.String"),
 		@Test(value={"$java.lang.Integer"}, assume="ok"),
 	})// */
-	public Object getClassInstance(Class<?> cls) throws ConstructorNotFoundException, InvocationTargetException {
+	private Object getClassInstance(Class<?> cls, List<String> constructorParamList) throws ConstructorNotFoundException, InvocationTargetException {
 		Init init = null;
 		Boolean access = null;
 		Constructor<?> constructor = null;
@@ -545,10 +552,17 @@ public class MethodChecker {
 		try {
 			if(init != null) {
 				List<Object> dataList = new ArrayList<Object>();
-				List<String> paramList = new ArrayList<String>();
-				// データリストの作成
-				for(String str : init.value()) {
-					paramList.add(str);
+				// 先にparamListが指定されている場合はそちらを優先。
+				List<String> paramList;
+				if(constructorParamList != null && constructorParamList.size() != 0) {
+					paramList = constructorParamList;
+				}
+				else {
+					paramList = new ArrayList<String>();
+					// データリストの作成
+					for(String str : init.value()) {
+						paramList.add(str);
+					}
 				}
 				// 文字列のデータリストをコンストラクタのパラメーターにあわせて変換
 				for(Class<?>type : constructor.getParameterTypes()) {
