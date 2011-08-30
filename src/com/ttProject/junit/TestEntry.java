@@ -85,6 +85,7 @@ public class TestEntry {
 	 * @return
 	 */
 	public boolean customCheck(String assume, Object ret) {
-		return true;
+		System.out.println("no check function");
+		return false;
 	}
 }
