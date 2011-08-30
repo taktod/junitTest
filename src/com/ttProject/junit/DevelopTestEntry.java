@@ -1,8 +1,5 @@
 package com.ttProject.junit;
 
-import com.ttProject.junit.annotation.Junit;
-import com.ttProject.junit.annotation.Test;
-
 /**
  * 作成中に利用したテスト動作
  * @author taktod
@@ -25,12 +22,12 @@ public class DevelopTestEntry extends TestEntry {
 		super.doTest();
 	}
 
-	@Junit({
+/*	@Junit({
 		@Test(value={"hello", "true"}, assume="hello:true"),
 		@Test({"hey", "true"}),
 		@Test(value={"hi", "false"}, assume="@RuntimeException"),
 		@Test({"wow", "false"}),
-	})
+	})//*/
 	public String doSomething(String str, boolean flg) {
 		if(!flg) {
 			throw new RuntimeException("hogehoge");
