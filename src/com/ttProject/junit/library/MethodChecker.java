@@ -63,8 +63,6 @@ public class MethodChecker {
 				stdReader = null;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 	/**
