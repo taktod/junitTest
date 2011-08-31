@@ -7,6 +7,7 @@ import java.lang.annotation.RetentionPolicy;
  * テスト用の定義アノーテーション
  */
 @Retention(RetentionPolicy.RUNTIME)
+//@Retention(RetentionPolicy.SOURCE)
 public @interface Test {
 	String[] init() default {}; // デフォルトデータはnull配列にしておく。
 	String[] value() default {};

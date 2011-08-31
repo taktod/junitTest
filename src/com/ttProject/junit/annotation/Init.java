@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
  * @author taktod
  */
 @Retention(RetentionPolicy.RUNTIME)
+//@Retention(RetentionPolicy.SOURCE)
 @Target({java.lang.annotation.ElementType.CONSTRUCTOR})
 public @interface Init {
-	String[] value();
+	String[] value() default {};
 }

@@ -1,5 +1,8 @@
 package com.ttProject.junit.library;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -31,22 +34,38 @@ public class MethodChecker {
 	private Map<String, Object>dataMap = null;
 	/** プロジェクト定義の応答用サポート */
 	private TestEntry entry = null;
+	private BufferedReader stdReader = null;
+
 	/**
 	 * コンストラクタ
 	 * @param classSet
 	 * @param dataMap
 	 * @param entry
 	 */
-	@Init({"null", "null", "null"})
-	public MethodChecker(Set<Class<?>> classSet, Map<String, Object>dataMap, TestEntry entry) {
+	@Init({"null", "null"})
+	public MethodChecker(Set<Class<?>> classSet, TestEntry entry) {
 		this.classSet = classSet;
-		this.dataMap = dataMap;
 		this.entry = entry;
+		this.dataMap = entry.getExtraData();
 	}
 	/**
 	 * コンストラクタ
 	 */
 	public MethodChecker() {
+	}
+	/**
+	 * 最終対処
+	 */
+	public void close() {
+		try {
+			if(stdReader != null) {
+				stdReader.close();
+				stdReader = null;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * 検査スタート
@@ -120,16 +139,39 @@ public class MethodChecker {
 				String assume = testEntry.assume();
 				System.out.println("[assume : " + assume + " result : " + ret + "]");
 				// 結果チェック
+				// 中断停止
+				if(assume.equals("@pause")) {
+					System.out.print("Please press entry key for next...");
+					if(stdReader == null) {
+						stdReader = new BufferedReader(new InputStreamReader(System.in));
+					}
+					stdReader.readLine();
+					continue;
+				}
 				// 結果全Dump
-				if(assume.equals("@dump")) {
+				if(assume.equals("@dump") || assume.equals("@dumppause")) {
 					dumpAll(ret);
 					System.out.println("[...passed...]");
+					if(entry.isStepByMode() || assume.equals("@dumppause")) {
+						System.out.print("Please press entry key for next...");
+						if(stdReader == null) {
+							stdReader = new BufferedReader(new InputStreamReader(System.in));
+						}
+						stdReader.readLine();
+					}
 					System.out.println();
 					continue;
 				}
 				// プロジェクト固有チェック
 				if(assume.startsWith("@custom")) {
 					if(entry.customCheck(assume, ret)) {
+						if(entry.isStepByMode()) {
+							System.out.print("Please press entry key for next...");
+							if(stdReader == null) {
+								stdReader = new BufferedReader(new InputStreamReader(System.in));
+							}
+							stdReader.readLine();
+						}
 						continue;
 					}
 					fail("custom check returns false...");
@@ -142,14 +184,28 @@ public class MethodChecker {
 				// 特に表示させるデータがない場合と特定文字列と一致する場合
 				if(assume.equals("@none") || assume.equals("@ok") || assume.equals(ret.toString())) {
 					System.out.println("[...passed...]");
+					if(entry.isStepByMode()) {
+						System.out.print("Please press entry key for next...");
+						if(stdReader == null) {
+							stdReader = new BufferedReader(new InputStreamReader(System.in));
+						}
+						stdReader.readLine();
+					}
 					System.out.println();
 				}
-				// 特定文字列と一致しない場合はエラー
-				else {
-					System.out.println("[value is corrupted...]");
-					fail("value is corrupted...");
+				// 強制中断
+				if(assume.equals("@abort")) {
+					System.out.print("Please entry any key for next...");
+					if(stdReader == null) {
+						stdReader = new BufferedReader(new InputStreamReader(System.in));
+					}
+					stdReader.readLine();
 					return;
 				}
+				// 特定文字列と一致しない場合はエラー
+				System.out.println("[value is corrupted...]");
+				fail("value is corrupted...");
+				return;
 			}
 			// テストしたメソッドにエラーがある場合
 			catch (InvocationTargetException e) {
@@ -160,6 +216,13 @@ public class MethodChecker {
 				if(assume.equals("@none")) {
 					System.out.println("[assume : @none]");
 					System.out.println("[...passed...]");
+					if(entry.isStepByMode()) {
+						System.out.print("Please press entry key for next...");
+						if(stdReader == null) {
+							stdReader = new BufferedReader(new InputStreamReader(System.in));
+						}
+						stdReader.readLine();
+					}
 					System.out.println();
 					continue;
 				}
@@ -172,6 +235,13 @@ public class MethodChecker {
 							// 指定されている例外が存在する場合はOK
 							System.out.println("[find the exception : " + testEntry.assume() + "]");
 							System.out.println("[...passed...]");
+							if(entry.isStepByMode()) {
+								System.out.print("Please press entry key for next...");
+								if(stdReader == null) {
+									stdReader = new BufferedReader(new InputStreamReader(System.in));
+								}
+								stdReader.readLine();
+							}
 							System.out.println();
 							continue;
 						}

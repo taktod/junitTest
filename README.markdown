@@ -70,6 +70,10 @@ charは動作に問題があるはずなので使わないこと推奨</pre>
 * @none <pre>出力データの確認なし。何があろうとそのままテストを実行する。</pre>
 * @ok <pre>出力データの確認なし。例外が発生した場合はテストを中断する。</pre>
 * @dump <pre>応答データを標準出力に出す。動作確認は行わない。(未定義のときのデフォルトの値)</pre>
+* @pause <pre>メソッドの動作確認をしたあと、Enterキーの入力を待つ</pre>
+* @dumppause <pre>出力をdumpした後にEnterキーの入力を待つ</pre>
+* @dumpabort <pre>出力をdumpした後にEnterキーの入力をまって中断</pre>
+* @abort <pre>Enterキーの入力をまって中断</pre>
 * @xxxException <pre>例外が発生することを期待する。対象例外と一致する名前の例外が発生しない場合はテストを中断する。</pre>
 * @custom[xxx] <pre>終了時にTestEntry継承クラス内のcustomCheck関数により判定する。true:処理続行 false:処理中断</pre>
 * 文字列 <pre>応答データをtoStringで文字列化したときの値が一致することを期待する。それ以外の場合はエラー扱いでテスト中断。</pre>

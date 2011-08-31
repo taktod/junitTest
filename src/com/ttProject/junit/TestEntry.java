@@ -17,6 +17,8 @@ import com.ttProject.junit.library.MethodChecker;
  * @author taktod
  */
 public class TestEntry {
+	/** メソッドごと一時停止 */
+	private boolean stepBy = false;
 	/** 設定パッケージ */
 	private String packagePath = "com.ttProject";
 	/** [#key]で呼び出される特殊変数 */
@@ -40,6 +42,26 @@ public class TestEntry {
 		extraData.put(key, value);
 	}
 	/**
+	 * 特殊データを取得する。
+	 * @return
+	 */
+	public Map<String, Object> getExtraData() {
+		return extraData;
+	}
+	/**
+	 * 呼び出すと、メソッドごとに処理を中断する
+	 */
+	public void stepByMode() {
+		stepBy = true;
+	}
+	/**
+	 * メソッドごとに一時中止
+	 * @return
+	 */
+	public boolean isStepByMode() {
+		return stepBy;
+	}
+	/**
 	 * 動作前準備
 	 * @throws Exception
 	 */
@@ -47,7 +69,7 @@ public class TestEntry {
 	public void setUp() throws Exception {
 		try {
 			ClassFinder cf = new ClassFinder();
-			checker = new MethodChecker(cf.getAppClass(packagePath), extraData, this);
+			checker = new MethodChecker(cf.getAppClass(packagePath), this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -58,6 +80,7 @@ public class TestEntry {
 	 */
 	@After
 	public void tearDown() throws Exception {
+		checker.close();
 	}
 	/**
 	 * 実行実体
