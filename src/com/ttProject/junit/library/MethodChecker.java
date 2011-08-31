@@ -295,6 +295,8 @@ public class MethodChecker {
 		}
 		// int
 		if(type == int.class || type == Integer.class) {
+			System.out.println("make int...");
+			System.out.println(obj);
 			return new Integer(obj);
 		}
 		// long
@@ -378,23 +380,36 @@ public class MethodChecker {
 		}
 		String[] array = getElementArray(obj);
 		Map<Object, Object> map = new HashMap<Object, Object>();
-		Object key, value;
+		Object key = null;
+		Object value = null;
 		for(String str : array) {
 			try {
 				String[] data = str.split("->");
 				try {
-					key = constructKey.newInstance(data[0]);
+					if(constructKey == null) {
+						key = data[0];
+					}
+					else {
+						key = constructKey.newInstance(data[0]);
+					}
 				}
 				catch (Exception e) {
-					key = data[0];
+					key = null;
 				}
 				try {
-					value = constructValue.newInstance(data[1]);
+					if(constructValue == null) {
+						value = data[1];
+					}
+					else {
+						value = constructValue.newInstance(data[1]);
+					}
 				}
 				catch (Exception e) {
-					value = data[1];
+					value = null;
 				}
-				map.put(key, value);
+				if(key != null && value != null) {
+					map.put(key, value);
+				}
 			}
 			catch (Exception e) {
 			}
