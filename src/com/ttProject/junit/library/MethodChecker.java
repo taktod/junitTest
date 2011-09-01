@@ -432,7 +432,12 @@ public class MethodChecker {
 		Set<Object> set = new HashSet<Object>();
 		for(String str : array) {
 			try {
-				set.add(construct.newInstance(str));
+				if(construct == null) {
+					set.add(str);
+				}
+				else {
+					set.add(construct.newInstance(str));
+				}
 			}
 			catch (Exception e) {
 			}
@@ -458,7 +463,12 @@ public class MethodChecker {
 		List<Object> list = new ArrayList<Object>();
 		for(String str : array) {
 			try {
-				list.add(construct.newInstance(str));
+				if(construct == null) {
+					list.add(str);
+				}
+				else {
+					list.add(construct.newInstance(str));
+				}
 			}
 			catch (Exception e) {
 			}
